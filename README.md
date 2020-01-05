@@ -23,6 +23,78 @@ representation that uses an array to store the children of each node.
 However, for certain tasks it can be less performant, because some operations that modify
 the tree structure require iterating over all the children of a node.
 
+## Demo
+### Creating a Tree
+
+Can `addchild` or `addsibling`.
+```julia
+julia> using LeftChildRightSiblingTrees
+
+julia> mum = Node("Mum");
+
+julia> me = addchild(mum, "Me");
+
+julia> son = addchild(me, "Son");
+
+julia> daughter = addchild(me, "Daughter");
+
+julia> brother = addsibling(me, "Brother");  # equivalent: to `addchild(mum, "Brother")`
+```
+
+### Querying about nodes:
+
+```julia
+julia> lastsibling(me)
+Node(Brother)
+
+julia> isroot(mum)
+true
+
+julia> isleaf(me)
+false
+
+julia> isleaf(daughter)
+true
+```
+
+### Iterating the Tree/Nodes
+Iteration goes through all (direct) children.
+The `.data` field holds the information put in the tree.
+we can use this to draw a simple visualization of the tree via recursion.
+
+```julia
+julia> for child in mum
+           println(child)
+       end
+Node(Me)
+Node(Brother)
+
+julia> function showtree(node, indent=0)
+           println("\t"^indent, node.data)
+           for child in node
+               showtree(child, indent + 1)
+           end
+       end
+showtree (generic function with 2 methods)
+
+julia> showtree(mum)
+Mum
+        Me
+                Son
+                Daughter
+        Brother
+```
+
+LeftChildRightSiblingTrees also has a built in function for showing this kind of info:
+```julia
+julia> LeftChildRightSiblingTrees.showedges(mum)
+Mum has the following children: Me    Brother
+Me has the following children: Son    Daughter
+Son has no children
+Daughter has no children
+Brother has no children
+```
+
 ## Credits
 
 This existed as an internal component of
