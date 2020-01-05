@@ -41,7 +41,6 @@ julia> daughter = addchild(me, "Daughter");
 julia> brother = addsibling(me, "Brother");
 ```
 
-
 ### Querying about nodes:
 
 ```julia
@@ -57,8 +56,6 @@ false
 julia> isleaf(daughter)
 true
 ```
-
-
 
 ### Iterating the Tree/Nodes
 Iteration goes through all (direct) children.
