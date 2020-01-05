@@ -38,7 +38,7 @@ julia> son = addchild(me, "Son");
 
 julia> daughter = addchild(me, "Daughter");
 
-julia> brother = addsibling(me, "Brother");
+julia> brother = addsibling(me, "Brother");  # equivalent: to `addchild(mum, "Brother")`
 ```
 
 ### Querying about nodes:
