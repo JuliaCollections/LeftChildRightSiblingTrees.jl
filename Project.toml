@@ -1,0 +1,13 @@
+name = "LeftChildRightSiblingTree"
+uuid = "1d6d02ad-be62-4b6b-8a6d-2f90e265016e"
+authors = ["Tim Holy <tim.holy@gmail.com>"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
