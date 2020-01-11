@@ -43,6 +43,9 @@ using Test
     LeftChildRightSiblingTrees.showedges(io, root)
     str = String(take!(io))
     @test occursin("2 has the following children", str)
+
+    @test depth(root) == 3
+    @test depth(c3) == 1
 end
 
 @testset "AbstractTrees" begin

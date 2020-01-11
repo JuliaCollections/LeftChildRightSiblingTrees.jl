@@ -5,6 +5,7 @@ module LeftChildRightSiblingTrees
 export Node,
     addchild,
     addsibling,
+    depth,
     isroot,
     isleaf,
     lastsibling
@@ -152,6 +153,15 @@ function showedges(io::IO, parent::Node, printfunc = identity)
     end
 end
 showedges(parent::Node) = showedges(stdout, parent)
+
+depth(node::Node) = depth(node, 1)
+function depth(node::Node, d)
+    childd = d + 1
+    for c in node
+        d = max(d, depth(c, childd))
+    end
+    return d
+end
 
 include("abstracttrees.jl")
 
