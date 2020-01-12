@@ -1,10 +1,11 @@
 module LeftChildRightSiblingTrees
 
-import Base: iterate, show
+# See `abstracttrees.jl` for the only dependency of this package
 
 export Node,
     addchild,
     addsibling,
+    depth,
     isroot,
     isleaf,
     lastsibling
@@ -108,18 +109,32 @@ Returns `true` if `node` has no children.
 """
 isleaf(n::Node) = n == n.child
 
-show(io::IO, n::Node) = print(io, "Node(", n.data, ')')
+Base.show(io::IO, n::Node) = print(io, "Node(", n.data, ')')
 
 # Iteration over children
 # for c in parent
 #     # do something
 # end
-function iterate(n::Node, state = n.child)
-    n == state && return nothing
-    return state, state == state.sibling ? n : state.sibling
+Base.IteratorSize(::Type{<:Node}) = Base.SizeUnknown()
+Base.eltype(::Type{Node{T}}) where T = Node{T}
+
+function Base.iterate(n::Node, state::Node = n.child)
+    n === state && return nothing
+    return state, state === state.sibling ? n : state.sibling
 end
 
-# TODO: use AbstractTrees.jl
+# To support Base.pairs
+struct PairIterator{T}
+    parent::Node{T}
+end
+Base.pairs(node::Node) = PairIterator(node)
+Base.IteratorSize(::Type{<:PairIterator}) = Base.SizeUnknown()
+
+function Base.iterate(iter::PairIterator, state::Node=iter.parent.child)
+    iter.parent === state && return nothing
+    return state=>state, state === state.sibling ? iter.parent : state.sibling
+end
+
 function showedges(io::IO, parent::Node, printfunc = identity)
     str = printfunc(parent.data)
     if str != nothing
@@ -138,5 +153,16 @@ function showedges(io::IO, parent::Node, printfunc = identity)
     end
 end
 showedges(parent::Node) = showedges(stdout, parent)
+
+depth(node::Node) = depth(node, 1)
+function depth(node::Node, d)
+    childd = d + 1
+    for c in node
+        d = max(d, depth(c, childd))
+    end
+    return d
+end
+
+include("abstracttrees.jl")
 
 end # module
