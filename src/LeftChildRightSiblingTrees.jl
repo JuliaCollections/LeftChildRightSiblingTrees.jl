@@ -111,6 +111,8 @@ Returns `true` if `node` has no children.
 """
 isleaf(n::Node) = n == n.child
 
+makeleaf!(n::Node) = n.child = n
+
 Base.show(io::IO, n::Node) = print(io, "Node(", n.data, ')')
 
 # Iteration over children
@@ -181,16 +183,17 @@ function graftchildren!(dest, src)
         lastsib = lastsibling(dest.child)
         lastsib.sibling = src.child
     end
-    src.child = src   # make src a leaf
+    makeleaf!(src)
     return dest
 end
 
 """
     prunebranch!(node)
 
-Eliminate `node` as a child of its parent.
+Eliminate `node` and all its children from the tree.
 """
 function prunebranch!(node)
+    isroot(node) && error("cannot prune the root")
     p = node.parent
     if p.child == node
         # `node` is the first child of p

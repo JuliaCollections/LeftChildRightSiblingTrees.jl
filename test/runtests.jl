@@ -79,6 +79,7 @@ using Test
     chlds = collect(root1)
     prunebranch!(chlds[1])
     @test [c.data for c in root1] == [2,3]
+    @test_throws ErrorException("cannot prune the root") prunebranch!(root1)
 end
 
 @testset "AbstractTrees" begin
