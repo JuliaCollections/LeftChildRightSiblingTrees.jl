@@ -95,6 +95,10 @@ Daughter has no children
 Brother has no children
 ```
 
+## Manipulating the tree
+
+See the docstrings for `graftchildren!` and `prunebranch!`.
+
 ## Credits
 
 This existed as an internal component of

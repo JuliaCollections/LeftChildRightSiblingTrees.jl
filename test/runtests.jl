@@ -46,6 +46,40 @@ using Test
 
     @test depth(root) == 3
     @test depth(c3) == 1
+
+    root1 = deepcopy(root)
+    node = collect(root1)[2]
+    graftchildren!(root1, node)
+    @test isleaf(node)
+    @test [c.data for c in root1] == [1,2,3,4,5]
+    for c in root1
+        @test c.parent == root1
+    end
+    prunebranch!(node)
+    @test [c.data for c in root1] == [1,3,4,5]
+
+    root1 = deepcopy(root)
+    chlds = collect(root1)
+    p, node = chlds[1], chlds[2]
+    @test isleaf(p)
+    graftchildren!(p, node)
+    @test isleaf(node)
+    @test [c.data for c in root1] == [1,2,3]
+    @test [c.data for c in p] == [4,5]
+    for c in p
+        @test c.parent == p
+    end
+
+    root1 = deepcopy(root)
+    chlds = collect(root1)
+    prunebranch!(chlds[end])
+    @test [c.data for c in root1] == [1,2]
+
+    root1 = deepcopy(root)
+    chlds = collect(root1)
+    prunebranch!(chlds[1])
+    @test [c.data for c in root1] == [2,3]
+    @test_throws ErrorException("cannot prune the root") prunebranch!(root1)
 end
 
 @testset "AbstractTrees" begin

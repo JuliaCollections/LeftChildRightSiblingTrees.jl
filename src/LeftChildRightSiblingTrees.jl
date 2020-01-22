@@ -6,9 +6,11 @@ export Node,
     addchild,
     addsibling,
     depth,
+    graftchildren!,
     isroot,
     isleaf,
-    lastsibling
+    lastsibling,
+    prunebranch!
 
 mutable struct Node{T}
     data::T
@@ -109,6 +111,8 @@ Returns `true` if `node` has no children.
 """
 isleaf(n::Node) = n == n.child
 
+makeleaf!(n::Node) = n.child = n
+
 Base.show(io::IO, n::Node) = print(io, "Node(", n.data, ')')
 
 # Iteration over children
@@ -161,6 +165,61 @@ function depth(node::Node, d)
         d = max(d, depth(c, childd))
     end
     return d
+end
+
+"""
+    graftchildren!(dest, src)
+
+Move the children of `src` to become children of `dest`.
+`src` becomes a leaf node.
+"""
+function graftchildren!(dest, src)
+    for c in src
+        c.parent = dest
+    end
+    if isleaf(dest)
+        dest.child = src.child
+    else
+        lastsib = lastsibling(dest.child)
+        lastsib.sibling = src.child
+    end
+    makeleaf!(src)
+    return dest
+end
+
+"""
+    prunebranch!(node)
+
+Eliminate `node` and all its children from the tree.
+"""
+function prunebranch!(node)
+    isroot(node) && error("cannot prune the root")
+    p = node.parent
+    if p.child == node
+        # `node` is the first child of p
+        if node.sibling === node
+            p.child = p   # p is now a leaf
+        else
+            p.child = node.sibling
+        end
+    else
+        # `node` is a middle or last child of p
+        child = p.child
+        sib = child.sibling
+        while sib != node
+            @assert sib != child
+            child = sib
+            sib = child.sibling
+        end
+        if sib.sibling === sib
+            # node is the last child of p, just truncate
+            child.sibling = child
+        else
+            # skip over node
+            child.sibling = sib.sibling
+        end
+    end
+    return p
 end
 
 include("abstracttrees.jl")
