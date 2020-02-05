@@ -9,6 +9,7 @@ export Node,
     graftchildren!,
     isroot,
     isleaf,
+    islastsibling,
     lastsibling,
     prunebranch!
 
@@ -57,7 +58,7 @@ Return the last sibling of `child`.
 """
 function lastsibling(sib::Node)
     newsib = sib.sibling
-    while sib != newsib
+    while !islastsibling(sib)
         sib = newsib
         newsib = sib.sibling
     end
@@ -105,6 +106,13 @@ Returns `true` if `node` is the root of a tree (meaning, it is its own parent).
 isroot(n::Node) = n == n.parent
 
 """
+    islastsibling(node)
+
+Returns `true` if `node` is the last sibling
+"""
+islastsibling(n::Node) = n === n.sibling
+
+"""
     isleaf(node)
 
 Returns `true` if `node` has no children.
@@ -112,6 +120,8 @@ Returns `true` if `node` has no children.
 isleaf(n::Node) = n == n.child
 
 makeleaf!(n::Node) = n.child = n
+
+makelastsibling!(n::Node) = n.sibling = n
 
 Base.show(io::IO, n::Node) = print(io, "Node(", n.data, ')')
 
@@ -124,7 +134,7 @@ Base.eltype(::Type{Node{T}}) where T = Node{T}
 
 function Base.iterate(n::Node, state::Node = n.child)
     n === state && return nothing
-    return state, state === state.sibling ? n : state.sibling
+    return state, islastsibling(state) ? n : state.sibling
 end
 
 # To support Base.pairs
@@ -136,7 +146,7 @@ Base.IteratorSize(::Type{<:PairIterator}) = Base.SizeUnknown()
 
 function Base.iterate(iter::PairIterator, state::Node=iter.parent.child)
     iter.parent === state && return nothing
-    return state=>state, state === state.sibling ? iter.parent : state.sibling
+    return state=>state, islastsibling(state) ? iter.parent : state.sibling
 end
 
 function showedges(io::IO, parent::Node, printfunc = identity)
@@ -197,8 +207,8 @@ function prunebranch!(node)
     p = node.parent
     if p.child == node
         # `node` is the first child of p
-        if node.sibling === node
-            p.child = p   # p is now a leaf
+        if islastsibling(node)
+            makeleaf!(p)   # p is now a leaf
         else
             p.child = node.sibling
         end
@@ -211,9 +221,9 @@ function prunebranch!(node)
             child = sib
             sib = child.sibling
         end
-        if sib.sibling === sib
+        if islastsibling(sib)
             # node is the last child of p, just truncate
-            child.sibling = child
+            makelastsibling!(child)
         else
             # skip over node
             child.sibling = sib.sibling
