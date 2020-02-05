@@ -5,15 +5,22 @@ using Test
     root = Node(0)
     @test isroot(root)
     @test isleaf(root)
+    @test islastsibling(root)
     nchildren = 0
     for c in root
         nchildren += 1
     end
     @test nchildren == 0
     c1 = addchild(root, 1)
+    @test islastsibling(c1)
     c2 = addchild(root, 2)
+    @test !islastsibling(c1)
+    @test islastsibling(c2)
     c3 = addsibling(c2, 3)
     @test lastsibling(c1) == c3
+    @test islastsibling(c3)
+    @test !islastsibling(c2)
+
     c21 = addchild(c2, 4)
     c22 = addchild(c2, 5)
     @test isroot(root)
