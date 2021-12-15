@@ -232,6 +232,19 @@ function prunebranch!(node)
     return p
 end
 
+function Base.:(==)(a::Node, b::Node)
+    a.data == b.data || return false
+    reta, retb = iterate(a), iterate(b)
+    while true
+        reta === retb === nothing && return true
+        (reta === nothing) || (retb === nothing) && return false
+        childa, statea = reta
+        childb, stateb = retb
+        childa == childb || return false
+        reta, retb = iterate(a, statea), iterate(b, stateb)
+    end
+end
+
 include("abstracttrees.jl")
 
 end # module

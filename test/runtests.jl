@@ -1,6 +1,16 @@
 using LeftChildRightSiblingTrees, AbstractTrees
 using Test
 
+function mumtree()
+    # from the README
+    mum = Node("Mum")
+    me = addchild(mum, "Me")
+    son = addchild(me, "Son")
+    daughter = addchild(me, "Daughter")
+    brother = addsibling(me, "Brother")
+    return mum
+end
+
 @testset "LeftChildRightSiblingTrees" begin
     root = Node(0)
     @test isroot(root)
@@ -87,6 +97,13 @@ using Test
     prunebranch!(chlds[1])
     @test [c.data for c in root1] == [2,3]
     @test_throws ErrorException("cannot prune the root") prunebranch!(root1)
+
+    tree1 = mumtree()
+    tree2 = mumtree()
+    @test tree1 == tree2
+    c = collect(tree1)
+    addchild(last(c), "Kid")
+    @test tree1 != tree2
 end
 
 @testset "AbstractTrees" begin
