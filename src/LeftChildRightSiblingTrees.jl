@@ -1,5 +1,7 @@
 module LeftChildRightSiblingTrees
 
+using AbstractTrees
+
 # See `abstracttrees.jl` for the only dependency of this package
 
 export Node,
@@ -103,7 +105,7 @@ end
 
 Returns `true` if `node` is the root of a tree (meaning, it is its own parent).
 """
-isroot(n::Node) = n == n.parent
+AbstractTrees.isroot(n::Node) = n == n.parent
 
 """
     islastsibling(node)
