@@ -1,14 +1,14 @@
 name = "LeftChildRightSiblingTrees"
 uuid = "1d6d02ad-be62-4b6b-8a6d-2f90e265016e"
 authors = ["Tim Holy <tim.holy@gmail.com>"]
-version = "0.1.4"
+version = "0.2.0"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 
 [compat]
 AbstractTrees = "0.4"
-julia = "1"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
