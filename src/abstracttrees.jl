@@ -1,18 +1,17 @@
-# This file provides support for the AbstractTrees interface.
 
-using AbstractTrees
+AbstractTrees.nodetype(::Type{<:Node{T}}) where T = Node{T}
+AbstractTrees.NodeType(::Type{<:Node{T}}) where T = HasNodeType()
 
-# Traits
-Base.eltype(::Type{<:TreeIterator{Node{T}}}) where T = Node{T}
-Base.IteratorEltype(::Type{<:TreeIterator{Node{T}}}) where T = Base.HasEltype()
-Base.parent(node::Node, state::Node) = state.parent
+AbstractTrees.parent(node::Node) = node.parent ≡ node ? nothing : node.parent
 
-AbstractTrees.parentlinks(::Type{Node{T}}) where T = AbstractTrees.StoredParents()
-AbstractTrees.siblinglinks(::Type{Node{T}}) where T = AbstractTrees.StoredSiblings()
-AbstractTrees.rootstate(node::Node) = node
+AbstractTrees.ParentLinks(::Type{<:Node{T}}) where T = StoredParents()
+AbstractTrees.SiblingLinks(::Type{<:Node{T}}) where T = StoredSiblings()
+
 AbstractTrees.children(node::Node) = node
-function AbstractTrees.nextsibling(tree::Node, state::Node)
-    ns = state.sibling
-    return state === ns ? nothing : ns
+
+function AbstractTrees.nextsibling(node::Node)
+    ns = node.sibling
+    return node ≡ ns ? nothing : ns
 end
-AbstractTrees.printnode(io::IO, node::Node) = print(io, node.data)
+
+AbstractTrees.nodevalue(node::Node) = node.data
