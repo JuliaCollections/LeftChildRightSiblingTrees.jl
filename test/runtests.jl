@@ -122,6 +122,12 @@ end
     newc = addchild(root, thirdroot)
     @test newc === thirdroot
     @test map(x -> x.data, collect(PreOrderDFS(root))) == [1, 2, 3, 4, 5, 6, 7]
+
+    @test !islastsibling(otherroot)
+    copied_root = copy_subtree(otherroot)
+    @test AbstractTrees.isroot(copied_root)
+    @test islastsibling(copied_root)
+    @test copied_root.child === otherroot.child
 end
 
 @testset "AbstractTrees" begin

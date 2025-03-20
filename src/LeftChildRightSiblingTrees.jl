@@ -13,7 +13,8 @@ export Node,
     isleaf,
     islastsibling,
     lastsibling,
-    prunebranch!
+    prunebranch!,
+    copy_subtree
 
 mutable struct Node{T}
     data::T
@@ -109,7 +110,6 @@ function addchild(parent::Node{T}, data::Node{T}) where T
     if !isroot(data)
         error("Child node must be a root node")
     end
-    data.parent = parent
     prevc = parent.child
     if prevc == parent
         parent.child = data
@@ -117,7 +117,20 @@ function addchild(parent::Node{T}, data::Node{T}) where T
         prevc = lastsibling(prevc)
         prevc.sibling = data
     end
+    data.parent = parent
     data
+end
+
+"""
+    new_root = copy_subtree(root::Node{T}) where {T}
+
+Get a shallow copy of the subtree rooted at `root`. Note that this does not copy the
+data, and only copies the root node. All children are unaffected.
+"""
+function copy_subtree(root::Node{T}) where {T}
+    new_root = Node{T}(root.data)
+    new_root.child = root.child
+    return new_root
 end
 
 """
