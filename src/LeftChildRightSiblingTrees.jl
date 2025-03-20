@@ -284,7 +284,7 @@ function Base.:(==)(a::Node, b::Node)
     reta, retb = iterate(a), iterate(b)
     while true
         reta === retb === nothing && return true
-        (reta === nothing) || (retb === nothing) && return false
+        ((reta === nothing) || (retb === nothing)) && return false
         childa, statea = reta
         childb, stateb = retb
         childa == childb || return false
