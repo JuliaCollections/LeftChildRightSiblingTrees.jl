@@ -127,7 +127,15 @@ end
     copied_root = copy_subtree(otherroot)
     @test AbstractTrees.isroot(copied_root)
     @test islastsibling(copied_root)
-    @test copied_root.child === otherroot.child
+    for (oldchild, newchild) in zip(otherroot, copied_root)
+        @test oldchild.parent === otherroot
+        @test newchild.parent === copied_root
+    end
+
+    leaf = Node(2)
+    copied_leaf = copy_subtree(leaf)
+    @test isleaf(leaf)
+    @test isleaf(copied_leaf)
 end
 
 @testset "AbstractTrees" begin

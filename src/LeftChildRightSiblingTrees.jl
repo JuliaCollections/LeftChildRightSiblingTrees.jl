@@ -125,11 +125,23 @@ end
     new_root = copy_subtree(root::Node{T}) where {T}
 
 Get a shallow copy of the subtree rooted at `root`. Note that this does not copy the
-data, and only copies the root node. All children are unaffected.
+data, and only copies the tree structure.
 """
 function copy_subtree(root::Node{T}) where {T}
     new_root = Node{T}(root.data)
-    new_root.child = root.child
+    if !isleaf(root)
+        last_child = new_root
+        for child in root
+            new_child = copy_subtree(child)
+            if last_child === new_root
+                new_root.child = new_child
+            else
+                last_child.sibling = new_child
+            end
+            new_child.parent = new_root
+            last_child = new_child
+        end
+    end
     return new_root
 end
 
