@@ -101,6 +101,26 @@ function addchild(parent::Node{T}, data) where T
 end
 
 """
+    child = addchild(parent::Node{T}, data::Node{T}) where {T}
+
+Add a node `data` as the last child of `parent`. Requires that `data` is a root node.
+"""
+function addchild(parent::Node{T}, data::Node{T}) where T
+    if !isroot(data)
+        error("Child node must be a root node")
+    end
+    data.parent = parent
+    prevc = parent.child
+    if prevc == parent
+        parent.child = data
+    else
+        prevc = lastsibling(prevc)
+        prevc.sibling = data
+    end
+    data
+end
+
+"""
     isroot(node)
 
 Returns `true` if `node` is the root of a tree (meaning, it is its own parent).

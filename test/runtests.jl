@@ -104,6 +104,24 @@ end
     c = collect(tree1)
     addchild(last(c), "Kid")
     @test tree1 != tree2
+
+    root = Node(1)
+    otherroot = Node(2)
+    addchild(otherroot, 3)
+    addchild(otherroot, 4)
+    newc = addchild(root, otherroot)
+    @test newc === otherroot
+    @test !isleaf(root)
+    @test depth(root) == 3
+    @test map(x -> x.data, collect(PreOrderDFS(root))) == [1, 2, 3, 4]
+    tmp = Node(0)
+    @test_throws ErrorException addchild(tmp, otherroot)
+    thirdroot = Node(5)
+    addchild(thirdroot, 6)
+    addchild(thirdroot, 7)
+    newc = addchild(root, thirdroot)
+    @test newc === thirdroot
+    @test map(x -> x.data, collect(PreOrderDFS(root))) == [1, 2, 3, 4, 5, 6, 7]
 end
 
 @testset "AbstractTrees" begin
