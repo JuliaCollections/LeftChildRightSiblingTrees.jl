@@ -104,6 +104,38 @@ end
     c = collect(tree1)
     addchild(last(c), "Kid")
     @test tree1 != tree2
+
+    root = Node(1)
+    otherroot = Node(2)
+    addchild(otherroot, 3)
+    addchild(otherroot, 4)
+    newc = addchild(root, otherroot)
+    @test newc === otherroot
+    @test !isleaf(root)
+    @test depth(root) == 3
+    @test map(x -> x.data, collect(PreOrderDFS(root))) == [1, 2, 3, 4]
+    tmp = Node(0)
+    @test_throws ErrorException addchild(tmp, otherroot)
+    thirdroot = Node(5)
+    addchild(thirdroot, 6)
+    addchild(thirdroot, 7)
+    newc = addchild(root, thirdroot)
+    @test newc === thirdroot
+    @test map(x -> x.data, collect(PreOrderDFS(root))) == [1, 2, 3, 4, 5, 6, 7]
+
+    @test !islastsibling(otherroot)
+    copied_root = copy_subtree(otherroot)
+    @test AbstractTrees.isroot(copied_root)
+    @test islastsibling(copied_root)
+    for (oldchild, newchild) in zip(otherroot, copied_root)
+        @test oldchild.parent === otherroot
+        @test newchild.parent === copied_root
+    end
+
+    leaf = Node(2)
+    copied_leaf = copy_subtree(leaf)
+    @test isleaf(leaf)
+    @test isleaf(copied_leaf)
 end
 
 @testset "AbstractTrees" begin
