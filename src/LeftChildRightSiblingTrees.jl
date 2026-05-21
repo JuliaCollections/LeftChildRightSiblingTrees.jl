@@ -12,6 +12,7 @@ export Node,
     isroot,
     isleaf,
     islastsibling,
+    isequiv,
     lastsibling,
     prunebranch!,
     copy_subtree
@@ -75,7 +76,7 @@ Append a new "youngest" sibling, storing `data` in `node`. `oldersib` must be
 the previously-youngest sibling (see [`lastsibling`](@ref)).
 """
 function addsibling(oldersib::Node{T}, data) where T
-    if oldersib.sibling != oldersib
+    if !islastsibling(oldersib)
         error("Truncation of sibling list")
     end
     youngersib = Node(data, oldersib.parent)
@@ -92,7 +93,7 @@ This adjusts all links to ensure the integrity of the tree.
 function addchild(parent::Node{T}, data) where T
     newc = Node(data, parent)
     prevc = parent.child
-    if prevc == parent
+    if prevc === parent
         parent.child = newc
     else
         prevc = lastsibling(prevc)
@@ -111,7 +112,7 @@ function addchild(parent::Node{T}, data::Node{T}) where T
         error("Child node must be a root node")
     end
     prevc = parent.child
-    if prevc == parent
+    if prevc === parent
         parent.child = data
     else
         prevc = lastsibling(prevc)
@@ -150,7 +151,7 @@ end
 
 Returns `true` if `node` is the root of a tree (meaning, it is its own parent).
 """
-AbstractTrees.isroot(n::Node) = n == n.parent
+AbstractTrees.isroot(n::Node) = n === n.parent
 
 """
     islastsibling(node)
@@ -164,7 +165,7 @@ islastsibling(n::Node) = n === n.sibling
 
 Returns `true` if `node` has no children.
 """
-isleaf(n::Node) = n == n.child
+isleaf(n::Node) = n === n.child
 
 makeleaf!(n::Node) = n.child = n
 
@@ -231,6 +232,8 @@ Move the children of `src` to become children of `dest`.
 `src` becomes a leaf node.
 """
 function graftchildren!(dest, src)
+    # With no children to move, `dest` is left untouched and `src` is already a leaf.
+    isleaf(src) && return dest
     for c in src
         c.parent = dest
     end
@@ -252,7 +255,7 @@ Eliminate `node` and all its children from the tree.
 function prunebranch!(node)
     isroot(node) && error("cannot prune the root")
     p = node.parent
-    if p.child == node
+    if p.child === node
         # `node` is the first child of p
         if islastsibling(node)
             makeleaf!(p)   # p is now a leaf
@@ -263,8 +266,8 @@ function prunebranch!(node)
         # `node` is a middle or last child of p
         child = p.child
         sib = child.sibling
-        while sib != node
-            @assert sib != child
+        while sib !== node
+            @assert sib !== child
             child = sib
             sib = child.sibling
         end
@@ -279,7 +282,17 @@ function prunebranch!(node)
     return p
 end
 
-function Base.:(==)(a::Node, b::Node)
+"""
+    isequiv(a::Node, b::Node)
+
+Return `true` if the subtrees rooted at `a` and `b` have the same shape and
+equal `data` at every corresponding node.
+
+This is a comparison by value: it can return `true` for two distinct objects.
+To test whether `a` and `b` are the same node, use `a === b`. Note that `==`
+and `isequal` on `Node`s test identity, not equivalence.
+"""
+function isequiv(a::Node, b::Node)
     a.data == b.data || return false
     reta, retb = iterate(a), iterate(b)
     while true
@@ -287,7 +300,7 @@ function Base.:(==)(a::Node, b::Node)
         ((reta === nothing) || (retb === nothing)) && return false
         childa, statea = reta
         childb, stateb = retb
-        childa == childb || return false
+        isequiv(childa, childb) || return false
         reta, retb = iterate(a, statea), iterate(b, stateb)
     end
 end

@@ -100,10 +100,15 @@ end
 
     tree1 = mumtree()
     tree2 = mumtree()
-    @test tree1 == tree2
+    # Two trees built separately from the same recipe hold equal data in the
+    # same arrangement, so they are equivalent, but they are not the same object.
+    @test isequiv(tree1, tree2)
+    @test tree1 != tree2
+    @test tree1 == tree1
     c = collect(tree1)
     addchild(last(c), "Kid")
-    @test tree1 != tree2
+    # Growing one tree leaves the other behind, so they are no longer equivalent.
+    @test !isequiv(tree1, tree2)
 
     root = Node(1)
     otherroot = Node(2)
@@ -152,4 +157,79 @@ end
     @test map(x->x.data, @inferred(collect(PostOrderDFS(root)))) == [1,4,5,2,3,0]
     @test map(x->x.data, @inferred(collect(PreOrderDFS(root)))) == [0,1,2,4,5,3]
     @test map(x->x.data, @inferred(collect(Leaves(root)))) == [1,4,5,3]
+end
+
+@testset "node identity vs. equivalence" begin
+    # `==` on nodes reports identity: a node equals only itself.
+    a = Node(1)
+    b = Node(1)
+    @test a == a
+    @test a != b
+    @test !isequal(a, b)
+
+    # Because equality is identity, equivalent-but-distinct trees are distinct
+    # keys in a Dict or Set.
+    addchild(a, 2)
+    addchild(b, 2)
+    @test isequiv(a, b)
+    d = Dict(a => "a", b => "b")
+    @test length(d) == 2
+    @test d[a] == "a" && d[b] == "b"
+
+    # `isequiv` compares trees by shape and by the data at each node.
+    c = Node(1); addchild(c, 99)            # same shape as `a`, different leaf data
+    @test !isequiv(a, c)
+    e = Node(1); addchild(e, 2); addchild(e, 3)   # an extra child relative to `a`
+    @test !isequiv(a, e)
+    @test isequiv(a, a)
+end
+
+@testset "graftchildren! with a childless source" begin
+    # Moving the children of a leaf means moving nothing: the destination is
+    # unchanged and the source keeps its place and its parent.
+    root = Node(0)
+    keeper = addchild(root, 1)
+    branch = addchild(root, 2)
+    leafy = addchild(branch, 3)
+    graftchildren!(root, leafy)
+    @test [c.data for c in root] == [1, 2]
+    @test [c.data for c in branch] == [3]
+    @test leafy.parent === branch
+    @test isleaf(leafy)
+end
+
+@testset "prunebranch! targets the requested node" begin
+    # A sibling holding the same data must not be mistaken for the target.
+    root = Node(0)
+    firstchild = addchild(root, 7)
+    victim = addchild(root, 7)
+    addchild(root, 9)
+    prunebranch!(victim)
+    @test [c.data for c in root] == [7, 9]
+    @test collect(root)[1] === firstchild
+
+    # The target is found even when an earlier sibling carries equal data.
+    root = Node(0)
+    addchild(root, 1)
+    survivor = addchild(root, 5)
+    addchild(root, 3)
+    victim = addchild(root, 5)
+    prunebranch!(victim)
+    @test [c.data for c in root] == [1, 5, 3]
+    @test collect(root)[2] === survivor
+end
+
+@testset "operations do not assume data equals itself" begin
+    # `NaN` is not equal to itself, so tree queries and construction must rely
+    # on object identity rather than on comparing data.
+    r = Node(NaN)
+    @test isroot(r)
+    @test isleaf(r)
+    @test islastsibling(r)
+
+    child = addchild(r, 1.0)
+    @test !isleaf(r)
+    @test !isroot(child)
+    @test child.parent === r
+    @test [c.data for c in r] == [1.0]
 end
