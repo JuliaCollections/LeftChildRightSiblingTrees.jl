@@ -185,18 +185,6 @@ function Base.iterate(n::Node, state::Node = n.child)
     return state, islastsibling(state) ? n : state.sibling
 end
 
-# To support Base.pairs
-struct PairIterator{T}
-    parent::Node{T}
-end
-Base.pairs(node::Node) = PairIterator(node)
-Base.IteratorSize(::Type{<:PairIterator}) = Base.SizeUnknown()
-
-function Base.iterate(iter::PairIterator, state::Node=iter.parent.child)
-    iter.parent === state && return nothing
-    return state=>state, islastsibling(state) ? iter.parent : state.sibling
-end
-
 function showedges(io::IO, parent::Node, printfunc = identity)
     str = printfunc(parent.data)
     if str != nothing
