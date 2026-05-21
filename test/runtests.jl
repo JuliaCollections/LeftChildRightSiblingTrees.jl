@@ -157,6 +157,13 @@ end
     @test map(x->x.data, @inferred(collect(PostOrderDFS(root)))) == [1,4,5,2,3,0]
     @test map(x->x.data, @inferred(collect(PreOrderDFS(root)))) == [0,1,2,4,5,3]
     @test map(x->x.data, @inferred(collect(Leaves(root)))) == [1,4,5,3]
+
+    # `children` returns a distinct iterator type rather than the node itself (issue #6)
+    ch = AbstractTrees.children(root)
+    @test ch isa LeftChildRightSiblingTrees.ChildIterator
+    @test eltype(ch) === Node{Int}
+    @test map(x->x.data, collect(ch)) == [1,2,3]
+    @test isempty(collect(AbstractTrees.children(c1)))
 end
 
 @testset "node identity vs. equivalence" begin
